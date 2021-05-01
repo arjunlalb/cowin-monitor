@@ -15,6 +15,7 @@
 
   .header-section {
     @include row-flex;
+    flex-flow: wrap;
 
     & > * {
       @include column-flex;
@@ -44,7 +45,7 @@
 }
 
 .select {
-  min-width: 240px;
+  min-width: 200px;
   height: 36px;
   border-radius: 2px;
   padding: 4px;
@@ -61,3 +62,15 @@
   min-width: 80px;
 }
 
+.footer {
+  @include column-flex;
+  font-size: 12px;
+  align-items: center;
+  position: fixed;
+  margin: 16px;
+  bottom: 0;
+
+  .footer-line {
+    margin: 2px;
+  }
+}
