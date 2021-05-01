@@ -15,6 +15,7 @@ export interface District {
 export interface Center {
   name: string;
   pincode: string;
+  fee_type : string;
   sessions: Session[]
 }
 
