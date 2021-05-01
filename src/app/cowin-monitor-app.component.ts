@@ -1,8 +1,8 @@
 import {HttpClient} from '@angular/common/http';
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {Component} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
-import {Center, Dictionary, District, State} from './types';
+import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
 
 @Component({
   selector: 'app-cowin-monitor',
@@ -12,7 +12,8 @@ import {Center, Dictionary, District, State} from './types';
       <div class="disclaimer">
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
-        <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (as on 2 May 2021).</p>
+        <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public
+          APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (as on 2 May 2021).</p>
         <p class="disclaimer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a
           href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
       </div>
@@ -58,11 +59,21 @@ import {Center, Dictionary, District, State} from './types';
 
       <div *ngIf="this.centers?.length === 0">No vaccination centers available at the moment.</div>
 
+      <div class="filter-section" *ngIf="this.centers?.length > 0">
+        <div class="fee-type-filter">
+          <select class="select" name="Filter by fee type" [(ngModel)]="this.feeTypeFilter" (ngModelChange)="this.filterCenters()">
+            <option *ngFor="let feeTypeFilterOption of this.feeTypeFilterOptions" [value]="feeTypeFilterOption">{{ feeTypeFilterOption }}</option>
+          </select>
+        </div>
+      </div>
+      
       <div class="vaccination-centers-info">
         <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
-          
+
           <p class="center-name">{{ center.name }}</p>
-          <div class="info-row"><p>({{this.getAgeEligibility(center)}}+)</p><div class="fee-type-label">{{ center.fee_type }}</div></div>
+          <div class="info-row"><p>({{this.getAgeEligibility(center)}}+)</p>
+            <div class="fee-type-label">{{ center.fee_type }}</div>
+          </div>
           <p class="pin-code">Pincode : {{ center.pincode}}</p>
           <p class="capacity">Available Capacity : {{ this.getAvailableCapacity(center)}}</p>
         </div>
@@ -71,7 +82,7 @@ import {Center, Dictionary, District, State} from './types';
   `
 })
 export class CowinMonitorAppComponent {
-  public centers: Center[];
+  public dataSet: Center[];
 
   public selectedStateId: string = '';
   public selectedDistrictId: string = '';
@@ -79,9 +90,13 @@ export class CowinMonitorAppComponent {
   public formattedDate: string = '';
   public centersWithAvailability?: number;
   public centersWithoutAvailability?: number;
+  public feeTypeFilter: FeeTypeFilter = FeeTypeFilter.FreeAndPaid;
 
   public states: State[] = [];
   public districts: District[] = [];
+  public centers: Center[];
+
+  public feeTypeFilterOptions: FeeTypeFilter[] = Object.values(FeeTypeFilter);
   public constructor(private readonly httpClient: HttpClient) {
     this.getStates();
   }
@@ -113,9 +128,26 @@ export class CowinMonitorAppComponent {
       .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]))
       .subscribe((data: Center[]) => {
         this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
-        this.centersWithAvailability = this.centers.filter(center => this.getAvailableCapacity(center) > 0).length;
-        this.centersWithoutAvailability = this.centers.filter(center => this.getAvailableCapacity(center) === 0).length;
+        this.dataSet = [...this.centers];
+        this.initMetadata();
       });
+  }
+
+  private initMetadata(): void {
+    this.centersWithAvailability = this.centers.filter(center => this.getAvailableCapacity(center) > 0).length;
+    this.centersWithoutAvailability = this.centers.filter(center => this.getAvailableCapacity(center) === 0).length;
+  }
+
+  public filterCenters(): void {
+    if (this.feeTypeFilter === FeeTypeFilter.FreeAndPaid) {
+      this.centers = [ ...this.dataSet ];
+    } else if (this.feeTypeFilter === FeeTypeFilter.OnlyPaid) {
+      this.centers = this.dataSet.filter(center => center.fee_type === 'Paid');
+    } else {
+      this.centers = this.dataSet.filter(center => center.fee_type === 'Free');
+    }
+
+    this.initMetadata();
   }
 
   public getAvailableCapacity(center: Center): number {

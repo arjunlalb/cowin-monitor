@@ -23,3 +23,9 @@ export interface Session {
   available_capacity: number;
   min_age_limit: number;
 }
+
+export enum FeeTypeFilter  {
+  FreeAndPaid = 'Free and Paid',
+  OnlyPaid = 'Only Paid',
+  OnlyFree = 'Only Free'
+}
