@@ -1,0 +1,63 @@
+@mixin column-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin row-flex {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.app-cowin-monitor {
+  @include column-flex;
+  align-items: center;
+
+  .header-section {
+    @include row-flex;
+
+    & > * {
+      @include column-flex;
+      padding: 8px;
+    }
+
+    .action-button-section {
+      justify-content: flex-end;
+    }
+  }
+
+  .vaccination-centers-info {
+    display: grid;
+    grid-template-columns: repeat(5, 200px);
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
+
+    .vaccination-center-card {
+      @include column-flex;
+      box-sizing: border-box;
+      border: 1px solid gray;
+      border-radius: 2px;
+      height: 100px;
+      align-items: center;
+    }
+  }
+}
+
+.select {
+  min-width: 240px;
+  height: 36px;
+  border-radius: 2px;
+  padding: 4px;
+}
+
+.input {
+  height: 32px;
+  padding-left: 4px;
+}
+
+.button {
+  height: 36px;
+  padding-left: 4px;
+  min-width: 80px;
+}
+
