@@ -118,11 +118,11 @@ export class CowinMonitorAppComponent {
   }
 
   public getAvailableCapacity(center: Center): number {
-    return (center.sessions).map((session ) => session.available_capacity as number ?? 0).reduce((a, b) => a + b, 0);
+    return center.sessions[0].available_capacity;
   }
 
   public getAgeEligibility(center: Center): number {
-    return Math.min(...center.sessions.filter(session => session.available_capacity > 0).map(session => session.min_age_limit), 45);
+    return center.sessions[0].min_age_limit;
   }
 
   private getStates(): void {
