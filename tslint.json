@@ -100,7 +100,6 @@
       "allow-empty-class",
       "allow-constructor-only"
     ],
-    "prefer-on-push-component-change-detection": true,
     "strict-comparisons": false,
     "import-blacklist": [true, "@angular/material", [".*/src/.*"]],
     "ban": [

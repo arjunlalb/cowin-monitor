@@ -8,6 +8,8 @@
   flex-direction: row;
 }
 
+$green: #659a41;
+$red: #ed5565;
 
 .app-cowin-monitor {
   @include column-flex;
@@ -27,11 +29,32 @@
     }
   }
 
+  .legend-section {
+    @include row-flex;
+
+    .legend {
+      @include row-flex;
+      align-items: center;
+      margin: 16px;
+
+      .marker {
+        height: 20px;
+        width: 40px;
+      }
+
+      & > * {
+        margin-right: 8px;
+      }
+    }
+  }
+
   .vaccination-centers-info {
     display: grid;
-    grid-template-columns: repeat(5, 200px);
+    grid-template-columns: repeat(4, 240px);
     grid-column-gap: 8px;
     grid-row-gap: 8px;
+
+
 
     .vaccination-center-card {
       @include column-flex;
@@ -60,6 +83,16 @@
   height: 36px;
   padding-left: 4px;
   min-width: 80px;
+  background-color: #1ca7ec;
+  color: white;
+  border-radius: 2px;
+  border: 1px solid #1ca7ec;
+  font-weight: 600;
+
+  &:disabled {
+    background-color: gray;
+    border: 1px solid gray;
+  }
 }
 
 .disclaimer {
@@ -74,3 +107,16 @@
     margin: 2px;
   }
 }
+
+.available {
+  background-color: $green;
+  border: 1px solid $green;
+  color: white;
+}
+
+.not-available {
+  background-color: $red;
+  border: 1px solid $red;
+  color: white;
+}
+

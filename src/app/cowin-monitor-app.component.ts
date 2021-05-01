@@ -1,8 +1,6 @@
-
-import { HttpClient } from '@angular/common/http';
-import {Component} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {map} from 'rxjs/operators';
-
 import {CONSTANTS} from './constants';
 import {Dictionary, District, State} from './types';
 
@@ -18,7 +16,6 @@ import {Dictionary, District, State} from './types';
       </div>
       
       <div class="header-section">
-        
         <div class="state-select-section">
           <h4>State : </h4>
           <select class="select" name="state" [ngModel]="this.selectedStateId" (ngModelChange)="this.setState($event)">
@@ -44,13 +41,23 @@ import {Dictionary, District, State} from './types';
           <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableButton()">Check</button>
         </div>
       </div>
-
-      <div class="error-message-section">
-        <p class="error-message">{{ this.errorMessage }}</p>
+      
+      <div class="legend-section">
+        <div class="legend">
+          <div class="marker available"></div>
+          <div>Available {{ this.centersWithAvailability !== undefined ? (this.centersWithAvailability) : ''}}</div>
+        </div>
+        
+        <div class="legend">
+          <div class="marker not-available"></div>
+          <div>Not Available {{ this.centersWithoutAvailability !== undefined ? (this.centersWithoutAvailability) : ''}}</div>
+        </div>
       </div>
+
+      <div *ngIf="this.centers?.length === 0">No vaccination centers available at the moment.</div>
       
       <div class="vaccination-centers-info">
-        <div class="vaccination-center-card" *ngFor="let center of this.centers">
+        <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="center.sessions[0].available_capacity > 0 ? 'available' : 'not-available'">
           <p class="center-name">{{ center.name }}</p>
           <p class="pin-code">{{ center.pincode}}</p>
         </div>
@@ -65,7 +72,8 @@ export class CowinMonitorAppComponent {
   public selectedDistrictId: string = '';
   public selectedDate: string = '';
   public formattedDate: string = '';
-  public errorMessage: string = '';
+  public centersWithAvailability?: number;
+  public centersWithoutAvailability?: number;
 
   public states: State[] = [];
   public districts: District[] = [];
@@ -98,7 +106,12 @@ export class CowinMonitorAppComponent {
   public getSlotInformation(): void {
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${this.selectedDistrictId}&date=${this.formattedDate}`)
       .pipe(map((data: Dictionary<unknown>) => data.centers as Dictionary<unknown>[]))
-      .subscribe((data: Dictionary<unknown>[]) => { this.centers = data; });
+      .subscribe((data: Dictionary<unknown>[]) => {
+        // This.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
+        this.centers = data;
+        this.centersWithAvailability = this.centers.filter(center => center.sessions[0].available_capacity > 0).length;
+        this.centersWithoutAvailability = this.centers.filter(center => center.sessions[0].available_capacity === 0).length;
+      });
   }
 
   private getStates(): void {
