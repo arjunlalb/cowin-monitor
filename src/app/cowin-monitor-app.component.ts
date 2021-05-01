@@ -60,7 +60,8 @@ import {Center, Dictionary, District, State} from './types';
 
       <div class="vaccination-centers-info">
         <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
-          <p class="center-name">{{ center.name }} ({{this.getAgeEligibility(center)}}+)</p>
+          <p class="center-name">{{ center.name }}</p>
+          <p>({{this.getAgeEligibility(center)}}+)</p>
           <p class="pin-code">Pincode : {{ center.pincode}}</p>
           <p class="capacity">Available Capacity : {{ this.getAvailableCapacity(center)}}</p>
         </div>
