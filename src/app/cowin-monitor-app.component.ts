@@ -14,7 +14,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
           vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
         <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public
           APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (as on 2 May 2021).</p>
-        <p class="disclaimer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a
+        <p class="disclaimer-line">If you notice any bugs or have suggestions, reach out to me on <a
           href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
       </div>
 
