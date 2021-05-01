@@ -62,15 +62,15 @@
   min-width: 80px;
 }
 
-.footer {
+.disclaimer {
   @include column-flex;
   font-size: 12px;
   align-items: center;
-  position: fixed;
+  background-color: white;
   margin: 16px;
-  bottom: 0;
+  width: 100%;
 
-  .footer-line {
+  .disclaimer-line {
     margin: 2px;
   }
 }

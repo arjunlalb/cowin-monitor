@@ -11,6 +11,12 @@ import {Dictionary, District, State} from './types';
   styleUrls: ['./cowin-monitor-app.component.scss'],
   template: `
     <div class="app-cowin-monitor">
+      <div class="disclaimer">
+        <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc.</p>
+        <p class="disclaimer-line">Data is fetched in real time from Co-WIN Public APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (2 May 2021)</p>
+        <p class="disclaimer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
+      </div>
+      
       <div class="header-section">
         
         <div class="state-select-section">
@@ -48,12 +54,6 @@ import {Dictionary, District, State} from './types';
           <p class="center-name">{{ center.name }}</p>
           <p class="pin-code">{{ center.pincode}}</p>
         </div>
-      </div>
-      
-      <div class="footer">
-        <p class="footer-line">This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc.</p>
-        <p class="footer-line">Data is fetched in real time from Co-WIN Public APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (2 May 2021)</p>
-        <p class="footer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
       </div>
     </div>
   `
