@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Component} from '@angular/core';
-import {map} from 'rxjs/operators';
+import {finalize, map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
 import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
 
@@ -57,7 +57,8 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
         </div>
       </div>
 
-      <div *ngIf="this.centers?.length === 0">No vaccination centers available at the moment.</div>
+      <div *ngIf="this.centers?.length === 0 && this.requestInProgress === false">No vaccination centers available at the moment.</div>
+      <div *ngIf="this.requestInProgress">Fetching data ...</div>
 
       <div class="filter-section" *ngIf="this.centers?.length > 0">
         <div class="fee-type-filter">
@@ -83,6 +84,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
 })
 export class CowinMonitorAppComponent {
   public dataSet: Center[];
+  public requestInProgress: boolean = false;
 
   public selectedStateId: string = '';
   public selectedDistrictId: string = '';
@@ -124,8 +126,11 @@ export class CowinMonitorAppComponent {
   }
 
   public getSlotInformation(): void {
+    this.requestInProgress = true;
+    this.centers = [];
+    this.dataSet = [];
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${this.selectedDistrictId}&date=${this.formattedDate}`)
-      .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]))
+      .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]), finalize(() => { this.requestInProgress = false;}))
       .subscribe((data: Center[]) => {
         this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
         this.dataSet = [...this.centers];
