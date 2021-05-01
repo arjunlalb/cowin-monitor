@@ -54,15 +54,20 @@ $red: #ed5565;
     grid-column-gap: 8px;
     grid-row-gap: 8px;
 
-
-
     .vaccination-center-card {
       @include column-flex;
       box-sizing: border-box;
       border: 1px solid gray;
       border-radius: 2px;
-      height: 100px;
+      min-height: 120px;
+      height: fit-content;
       align-items: center;
+      padding: 8px;
+      justify-content: space-evenly;
+
+      p {
+        margin: 2px;
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
-import {Dictionary, District, State} from './types';
+import {Center, Dictionary, District, State} from './types';
 
 @Component({
   selector: 'app-cowin-monitor',
@@ -10,11 +10,13 @@ import {Dictionary, District, State} from './types';
   template: `
     <div class="app-cowin-monitor">
       <div class="disclaimer">
-        <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc.</p>
-        <p class="disclaimer-line">Data is fetched in real time from Co-WIN Public APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (2 May 2021)</p>
-        <p class="disclaimer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
+        <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their
+          vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
+        <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (as on 2 May 2021).</p>
+        <p class="disclaimer-line">Developed by <a href="http://www.arjunlal.in">Arjun</a>. If you notice any bugs or have suggestions, reach out to me on <a
+          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
       </div>
-      
+
       <div class="header-section">
         <div class="state-select-section">
           <h4>State : </h4>
@@ -23,7 +25,7 @@ import {Dictionary, District, State} from './types';
             <option *ngFor="let state of this.states" [value]="state.state_id">{{state.state_name}}</option>
           </select>
         </div>
-        
+
         <div class="district-select-section">
           <h4>District : </h4>
           <select class="select" name="district" [ngModel]="this.selectedDistrictId" (ngModelChange)="this.setDistrict($event)">
@@ -36,18 +38,18 @@ import {Dictionary, District, State} from './types';
           <h4>Date : </h4>
           <input class="input" type="date" [ngModel]="this.selectedDate" (ngModelChange)="this.setDate($event)">
         </div>
-        
+
         <div class="action-button-section">
           <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableButton()">Check</button>
         </div>
       </div>
-      
+
       <div class="legend-section">
         <div class="legend">
           <div class="marker available"></div>
           <div>Available {{ this.centersWithAvailability !== undefined ? (this.centersWithAvailability) : ''}}</div>
         </div>
-        
+
         <div class="legend">
           <div class="marker not-available"></div>
           <div>Not Available {{ this.centersWithoutAvailability !== undefined ? (this.centersWithoutAvailability) : ''}}</div>
@@ -55,18 +57,19 @@ import {Dictionary, District, State} from './types';
       </div>
 
       <div *ngIf="this.centers?.length === 0">No vaccination centers available at the moment.</div>
-      
+
       <div class="vaccination-centers-info">
-        <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="center.sessions[0].available_capacity > 0 ? 'available' : 'not-available'">
-          <p class="center-name">{{ center.name }}</p>
-          <p class="pin-code">{{ center.pincode}}</p>
+        <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
+          <p class="center-name">{{ center.name }} ({{this.getAgeEligibility(center)}}+)</p>
+          <p class="pin-code">Pincode : {{ center.pincode}}</p>
+          <p class="capacity">Available Capacity : {{ this.getAvailableCapacity(center)}}</p>
         </div>
       </div>
     </div>
   `
 })
 export class CowinMonitorAppComponent {
-  public centers: Dictionary<unknown>[];
+  public centers: Center[];
 
   public selectedStateId: string = '';
   public selectedDistrictId: string = '';
@@ -105,13 +108,20 @@ export class CowinMonitorAppComponent {
 
   public getSlotInformation(): void {
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${this.selectedDistrictId}&date=${this.formattedDate}`)
-      .pipe(map((data: Dictionary<unknown>) => data.centers as Dictionary<unknown>[]))
-      .subscribe((data: Dictionary<unknown>[]) => {
-        // This.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
-        this.centers = data;
-        this.centersWithAvailability = this.centers.filter(center => center.sessions[0].available_capacity > 0).length;
-        this.centersWithoutAvailability = this.centers.filter(center => center.sessions[0].available_capacity === 0).length;
+      .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]))
+      .subscribe((data: Center[]) => {
+        this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
+        this.centersWithAvailability = this.centers.filter(center => this.getAvailableCapacity(center) > 0).length;
+        this.centersWithoutAvailability = this.centers.filter(center => this.getAvailableCapacity(center) === 0).length;
       });
+  }
+
+  public getAvailableCapacity(center: Center): number {
+    return (center.sessions).map((session ) => session.available_capacity as number ?? 0).reduce((a, b) => a + b, 0);
+  }
+
+  public getAgeEligibility(center: Center): number {
+    return Math.min(...center.sessions.filter(session => session.available_capacity > 0).map(session => session.min_age_limit), 45);
   }
 
   private getStates(): void {

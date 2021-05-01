@@ -11,3 +11,14 @@ export interface District {
   district_id: string;
   district_name: string;
 }
+
+export interface Center {
+  name: string;
+  pincode: string;
+  sessions: Session[]
+}
+
+export interface Session {
+  available_capacity: number;
+  min_age_limit: number;
+}
