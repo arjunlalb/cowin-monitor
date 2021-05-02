@@ -74,9 +74,12 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
       </div>
 
       <div class="metadata-section">
+        <button *ngIf="this.shouldShowDaySwitchers" class="button" (click)="this.goToPreviousDay()">Previous Day</button>
         <div *ngIf="this.centers?.length === 0 && this.requestInProgress === false">No vaccination centers matching this criteria available at the moment.</div>
         <div *ngIf="this.centers?.length > 0 && this.requestInProgress === false">Found {{this.centers?.length}} vaccination centers</div>
         <div *ngIf="this.requestInProgress">Fetching data ...</div>
+        
+        <button *ngIf="this.shouldShowDaySwitchers" class="button" (click)="this.goToNextDay()">Next Day</button>
       </div>
       
       <div class="vaccination-centers-info">
@@ -113,6 +116,7 @@ export class CowinMonitorAppComponent {
 
   public feeTypeFilterOptions: FeeTypeFilter[] = Object.values(FeeTypeFilter);
   public ageFilterOptions: number[] = [18, 45];
+  public shouldShowDaySwitchers: boolean = false;
 
   public constructor(private readonly httpClient: HttpClient) {
     this.getStates();
@@ -136,6 +140,30 @@ export class CowinMonitorAppComponent {
     return date.split('-').reverse().join('-');
   }
 
+  public goToNextDay(): void {
+    const tomorrow: Date = new Date();
+    tomorrow.setDate(new Date(this.selectedDate).getDate()+1);
+    this.setDateAndRefresh(tomorrow);
+  }
+
+  public goToPreviousDay(): void {
+    const tomorrow: Date = new Date();
+    tomorrow.setDate(new Date(this.selectedDate).getDate()-1);
+    this.setDateAndRefresh(tomorrow);
+  }
+
+  private setDateAndRefresh(tomorrow: Date): void {
+    this.setDate([tomorrow.getUTCFullYear(), this.getStringRepresentation(tomorrow.getUTCMonth()),  this.getStringRepresentation(tomorrow.getUTCDate())].join('-'));
+    this.getSlotInformation();
+  }
+
+  private getStringRepresentation(value: number) : string | number {
+    if (value >= 10) {
+      return value;
+    }
+
+    return `0${value}`;
+  }
   public enableButton(): boolean {
     return this.selectedDistrictId !== '' && this.selectedDate !== '';
   }
@@ -161,7 +189,7 @@ export class CowinMonitorAppComponent {
     this.centers = [];
     this.dataSet = [];
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${this.selectedDistrictId}&date=${this.formattedDate}`)
-      .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]), finalize(() => { this.requestInProgress = false;}))
+      .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]), finalize(() => { this.requestInProgress = false; this.shouldShowDaySwitchers = true;}))
       .subscribe((data: Center[]) => {
         this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
         this.dataSet = [...this.centers];
