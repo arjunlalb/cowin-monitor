@@ -87,7 +87,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
             <div class="fee-type-label">{{ center.fee_type }}</div>
           </div>
           <p class="pin-code">Pincode : {{ center.pincode}}</p>
-          <p class="capacity">Available Capacity : {{ this.getAvailableCapacity(center)}}</p>
+          <p class="capacity">Available Doses : {{ this.getAvailableCapacity(center)}}</p>
           <p *ngIf="center.sessions[0].vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
         </div>
       </div>
