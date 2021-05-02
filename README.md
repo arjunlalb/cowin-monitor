@@ -15,3 +15,7 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 * Specify a clear title for the PR.
 * For non-minor changes, give a description of the changes.
+
+## Deployment
+
+The app is currently deployed using netlify and auto deployment is disabled. 
