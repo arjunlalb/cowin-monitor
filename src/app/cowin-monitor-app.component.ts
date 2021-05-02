@@ -10,7 +10,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
   template: `
     <div class="app-cowin-monitor">
       <div class="disclaimer">
-        <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their
+        <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find vaccine availability information. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
         <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public
           APIs <a href="https://apisetu.gov.in/public/api/cowin#">here</a>.</p>
