@@ -70,7 +70,6 @@ $red: #ed5565;
     .vaccination-center-card {
       @include column-flex;
       box-sizing: border-box;
-      border: 1px solid gray;
       border-radius: 2px;
       min-height: 120px;
       height: auto;
