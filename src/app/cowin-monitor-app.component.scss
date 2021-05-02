@@ -68,9 +68,11 @@ $red: #ed5565;
 
   .vaccination-centers-info {
     display: grid;
-    grid-template-columns: repeat(4, 260px);
+    grid-template-columns: repeat(auto-fit, 260px);
     grid-column-gap: 8px;
     grid-row-gap: 8px;
+    width: 100%;
+    justify-content: center;
 
     .vaccination-center-card {
       @include column-flex;
