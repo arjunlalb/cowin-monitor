@@ -52,6 +52,7 @@ $red: #ed5565;
   .filter-section {
     @include row-flex;
     padding: 16px;
+    align-items: flex-end;
 
     & > * {
       margin: 0 16px;

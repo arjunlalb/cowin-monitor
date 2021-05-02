@@ -59,6 +59,11 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
             <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
           </select>
         </div>
+        
+        <div class="availability-filter">
+          <input type="checkbox" [(ngModel)]="this.filterByAvailability" (ngModelChange)="this.filterCenters()">
+          <span>Show only available centers</span>
+        </div>
       </div>
 
       <div class="legend-section">
@@ -109,6 +114,7 @@ export class CowinMonitorAppComponent {
   public centersWithoutAvailability?: number;
   public feeTypeFilter: FeeTypeFilter = FeeTypeFilter.FreeAndPaid;
   public eligibilityAgeFilter: number = 45;
+  public filterByAvailability: boolean = false;
 
   public states: State[] = [];
   public districts: District[] = [];
@@ -219,7 +225,10 @@ export class CowinMonitorAppComponent {
 
     // Eligibility age filter
     // tslint:disable-next-line:triple-equals
-    this.centers = filteredList.filter(center => this.getAgeEligibility(center) == this.eligibilityAgeFilter);
+    this.centers = filteredList.filter(center => this.getAgeEligibility(center) === this.eligibilityAgeFilter as number);
+
+    // Availability filter
+    this.centers = this.filterByAvailability ? filteredList.filter(center => this.getAvailableCapacity(center) > 0) : filteredList;
 
     this.initMetadata();
   }
@@ -234,12 +243,12 @@ export class CowinMonitorAppComponent {
 
   private getStates(): void {
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/admin/location/states`)
-      .pipe(map((data: Dictionary<unknown>) => data.states as State[])).subscribe((states: State[]) => this.states = states);
+      .pipe(map((data: Dictionary<unknown>) => data.states as State[])).subscribe((states: State[]) => { this.states = states; });
   }
 
   private getDistricts(): void {
     this.httpClient.get(`${CONSTANTS.URL_PREFIX}/admin/location/districts/${this.selectedStateId}`)
       .pipe(map((data: Dictionary<unknown>) => data.districts as District[]))
-      .subscribe((data: District[]) => { this.districts = data});
+      .subscribe((data: District[]) => { this.districts = data; });
   }
 }

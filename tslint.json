@@ -34,7 +34,7 @@
     "component-class-suffix": true,
     "directive-class-suffix": true,
     "no-pipe-impure": true,
-    "template-cyclomatic-complexity": [true, 9],
+    "template-cyclomatic-complexity": [true, 12],
     "template-conditional-complexity": [true, 4],
     "no-inferrable-types": [true, "ignore-properties", "ignore-params"],
     "typedef": [
