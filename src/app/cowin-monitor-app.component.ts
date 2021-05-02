@@ -88,6 +88,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
           </div>
           <p class="pin-code">Pincode : {{ center.pincode}}</p>
           <p class="capacity">Available Capacity : {{ this.getAvailableCapacity(center)}}</p>
+          <p *ngIf="center.sessions[0].vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
         </div>
       </div>
     </div>
@@ -137,6 +138,22 @@ export class CowinMonitorAppComponent {
 
   public enableButton(): boolean {
     return this.selectedDistrictId !== '' && this.selectedDate !== '';
+  }
+
+  public getVaccineDetails(center: Center): string {
+    const vaccineName: string = center.sessions[0].vaccine;
+
+    if (vaccineName === '') {
+      return '!';
+    }
+
+    const fee: string | number = (center.vaccine_fees.find(vaccineFee => vaccineFee.vaccine === vaccineName)?.fee ?? '');
+
+    if (fee) {
+      return [vaccineName, `${fee} Rs`].join(' : ');
+    }
+
+    return vaccineName;
   }
 
   public getSlotInformation(): void {

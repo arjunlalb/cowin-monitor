@@ -16,12 +16,17 @@ export interface Center {
   name: string;
   pincode: string;
   fee_type : string;
-  sessions: Session[]
+  sessions: Session[];
+  vaccine_fees: {
+    vaccine: string;
+    fee: number;
+  }[]
 }
 
 export interface Session {
   available_capacity: number;
   min_age_limit: number;
+  vaccine: string;
 }
 
 export enum FeeTypeFilter  {

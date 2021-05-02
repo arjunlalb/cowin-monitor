@@ -73,7 +73,7 @@ $red: #ed5565;
       border: 1px solid gray;
       border-radius: 2px;
       min-height: 120px;
-      height: fit-content;
+      height: auto;
       align-items: center;
       padding: 8px;
       justify-content: space-evenly;
@@ -90,8 +90,24 @@ $red: #ed5565;
         text-align: center;
       }
 
+      .vaccine-details {
+        border-radius: 8px;
+        background-color: gray;
+        padding: 2px 6px;
+        color: white;
+        margin-left: 4px;
+
+        &.COVISHIELD {
+          background-color: darkgreen;
+        }
+
+        &.COVAXIN {
+          background-color: darkslateblue;
+        }
+      }
+
       .fee-type-label {
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: white;
         padding: 2px 6px;
         color: black;
