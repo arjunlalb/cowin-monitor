@@ -104,7 +104,6 @@ enum View {
       <div class="vaccination-centers-info">
         
         <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
-
           <p class="center-name">{{ center.name }}</p>
           <div class="info-row"><p>({{this.getAgeEligibility(center)}}+)</p>
             <div class="fee-type-label">{{ center.fee_type }}</div>
@@ -113,7 +112,9 @@ enum View {
           <p class="capacity">Available Doses : {{ this.getAvailableCapacity(center)}}</p>
           <p *ngIf="center.sessions[0]?.vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
           <p *ngIf="this.isCenterView()" class="availability">Available on : {{this.getAvailabilityDateDisplayString(center.sessions[0]?.date)}}</p>
+          <button *ngIf="this.getAvailableCapacity(center) > 0" class="button book-now-button" (click)="this.goToCowinPortal()">Book Now</button>
         </div>
+        
       </div>
     </div>
   `
@@ -154,6 +155,10 @@ export class CowinMonitorAppComponent {
 
   public setDistrict(districtId: string): void {
     this.selectedDistrictId = districtId;
+  }
+
+  public goToCowinPortal(): void {
+    window.open(CONSTANTS.REGISTRATION_URL, "_blank");
   }
 
   public setDate(date: string): void {
@@ -216,7 +221,7 @@ export class CowinMonitorAppComponent {
   }
 
   private buildCalendarUrl(districtId: string, date: string): string {
-    return `${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${districtId}&date=${date}`;
+    return `${CONSTANTS.API_URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${districtId}&date=${date}`;
   }
 
   public getAvailabilityDateDisplayString(date: string | undefined): string {
@@ -338,12 +343,12 @@ export class CowinMonitorAppComponent {
   }
 
   private getStates(): void {
-    this.httpClient.get(`${CONSTANTS.URL_PREFIX}/admin/location/states`)
+    this.httpClient.get(`${CONSTANTS.API_URL_PREFIX}/admin/location/states`)
       .pipe(map((data: Dictionary<unknown>) => data.states as State[])).subscribe((states: State[]) => { this.states = states; });
   }
 
   private getDistricts(): void {
-    this.httpClient.get(`${CONSTANTS.URL_PREFIX}/admin/location/districts/${this.selectedStateId}`)
+    this.httpClient.get(`${CONSTANTS.API_URL_PREFIX}/admin/location/districts/${this.selectedStateId}`)
       .pipe(map((data: Dictionary<unknown>) => data.districts as District[]))
       .subscribe((data: District[]) => { this.districts = data; });
   }

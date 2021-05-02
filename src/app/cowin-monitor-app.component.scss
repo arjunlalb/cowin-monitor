@@ -91,6 +91,10 @@ $red: #ed5565;
       justify-content: space-evenly;
       letter-spacing: 0.01em;
 
+      .book-now-button {
+        margin: 4px 0;
+      }
+
       .info-row {
         @include row-flex;
         align-items: center;
@@ -152,8 +156,8 @@ $red: #ed5565;
   min-width: 80px;
   background-color: #0178bd;
   color: white;
-  border-radius: 2px;
-  border: 1px solid #1ca7ec;
+  border-radius: 4px;
+  border: 1px solid #0178bd;
   font-weight: 600;
   cursor: pointer;
 
