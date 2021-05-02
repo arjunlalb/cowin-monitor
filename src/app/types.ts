@@ -13,6 +13,7 @@ export interface District {
 }
 
 export interface Center {
+  id: number;
   name: string;
   pincode: string;
   fee_type : string;
@@ -27,6 +28,7 @@ export interface Session {
   available_capacity: number;
   min_age_limit: number;
   vaccine: string;
+  date: string;
 }
 
 export enum FeeTypeFilter  {

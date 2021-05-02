@@ -1,6 +1,7 @@
 import {HttpClient} from '@angular/common/http';
 import {Component} from '@angular/core';
-import {finalize, map} from 'rxjs/operators';
+import {EMPTY} from 'rxjs';
+import {catchError, finalize, map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
 import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
 
@@ -87,6 +88,8 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
         <button *ngIf="this.shouldShowDaySwitchers" class="button" (click)="this.goToNextDay()">Next Day</button>
       </div>
       
+      <div *ngFor="let availability of this.getAvailabilityInfoForDisplay()"></div>
+      
       <div class="vaccination-centers-info">
         <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
 
@@ -124,6 +127,8 @@ export class CowinMonitorAppComponent {
   public ageFilterOptions: number[] = [18, 45];
   public shouldShowDaySwitchers: boolean = false;
 
+  private nextAvailabilityInformation: Map<number, Center> = new Map<number, Center>();
+  private shouldBuildAvailabilityInfo: boolean = true;
   public constructor(private readonly httpClient: HttpClient) {
     this.getStates();
   }
@@ -135,6 +140,7 @@ export class CowinMonitorAppComponent {
 
   public setDistrict(districtId: string): void {
     this.selectedDistrictId = districtId;
+    // This.populateNextAvailabilityInfo();
   }
 
   public setDate(date: string): void {
@@ -147,29 +153,32 @@ export class CowinMonitorAppComponent {
   }
 
   public goToNextDay(): void {
-    const tomorrow: Date = new Date();
-    tomorrow.setDate(new Date(this.selectedDate).getDate()+1);
-    this.setDateAndRefresh(tomorrow);
+    this.setDateAndRefresh(this.buildOffsetDate(new Date(this.selectedDate), 1));
   }
 
   public goToPreviousDay(): void {
-    const tomorrow: Date = new Date();
-    tomorrow.setDate(new Date(this.selectedDate).getDate()-1);
-    this.setDateAndRefresh(tomorrow);
+    this.setDateAndRefresh(this.buildOffsetDate(new Date(this.selectedDate), -1));
   }
 
-  private setDateAndRefresh(tomorrow: Date): void {
-    this.setDate([tomorrow.getUTCFullYear(), this.getStringRepresentation(tomorrow.getUTCMonth()),  this.getStringRepresentation(tomorrow.getUTCDate())].join('-'));
+  private setDateAndRefresh(date: Date): void {
+    this.setDate(this.buildDateString(date));
     this.getSlotInformation();
   }
 
-  private getStringRepresentation(value: number) : string | number {
-    if (value >= 10) {
-      return value;
-    }
-
-    return `0${value}`;
+  private buildOffsetDate(date: Date, offsetValue: number): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + offsetValue);
   }
+
+  private buildDateString(date: Date): string {
+    return [
+      date.getFullYear(),
+      // tslint:disable-next-line:prefer-template
+      ('0' + (date.getMonth() + 1)).slice(-2),
+      // tslint:disable-next-line:prefer-template
+      ('0' + date.getDate()).slice(-2)
+    ].join('-');
+  }
+
   public enableButton(): boolean {
     return this.selectedDistrictId !== '' && this.selectedDate !== '';
   }
@@ -190,17 +199,74 @@ export class CowinMonitorAppComponent {
     return vaccineName;
   }
 
+  private buildCalendarUrl(districtId: string, date: string): string {
+    return `${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${districtId}&date=${date}`;
+  }
+
   public getSlotInformation(): void {
     this.requestInProgress = true;
     this.centers = [];
     this.dataSet = [];
-    this.httpClient.get(`${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${this.selectedDistrictId}&date=${this.formattedDate}`)
+    this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.formattedDate)}`)
       .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]), finalize(() => { this.requestInProgress = false; this.shouldShowDaySwitchers = true;}))
       .subscribe((data: Center[]) => {
-        this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
+        this.centers = data.sort(this.getSortCenterByNameFn());
         this.dataSet = [...this.centers];
         this.filterCenters();
       });
+  }
+
+  private getSortCenterByNameFn(): (center1: Center, center2: Center) => number {
+    return (center1, center2) => (center1.name as string).localeCompare(center2.name as string)
+  }
+
+  private populateNextAvailabilityInfo(): void {
+    const today: Date = new Date();
+    this.shouldBuildAvailabilityInfo = false;
+
+    for (let i = 0; i < 8; i++) {
+      // Fetching one week at a time, for 8 weeks
+      this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.buildDateString(this.buildOffsetDate(today, i * 7)))}`)
+        .pipe(
+          map((data: Dictionary<unknown>) => data.centers as Center[]),
+          catchError(() => {
+            this.shouldBuildAvailabilityInfo = true;
+
+            return EMPTY;
+          }))
+        .subscribe(
+        (data: Center[]) => {
+          data.forEach(center => {
+            const existingCenterInfo: Center = this.nextAvailabilityInformation.get(center.id);
+            if (existingCenterInfo === undefined) {
+              this.nextAvailabilityInformation.set(center.id, this.removeUnavailableSessionsFromCenter(center))
+            } else {
+
+              this.nextAvailabilityInformation.set(center.id, {
+                ...existingCenterInfo, sessions: existingCenterInfo.sessions.concat(...this.removeUnavailableSessionsFromCenter(center).sessions)
+              })
+            }
+          })
+        }
+      )
+    }
+
+
+  }
+
+  public getAvailabilityInfoForDisplay(): Center[] {
+    const availabilityInfo: Center[] = Array.from(this.nextAvailabilityInformation.values());
+    availabilityInfo.sort(this.getSortCenterByNameFn())
+    availabilityInfo.forEach(center => {
+      center.sessions.sort((session1, session2) => new Date(session1.date).getTime() - new Date(session2.date).getTime())
+    })
+    console.log(availabilityInfo);
+
+    return availabilityInfo;
+  }
+
+  private removeUnavailableSessionsFromCenter(center: Center): Center {
+    return { ...center, sessions: center.sessions.filter(session => session.available_capacity > 0)};
   }
 
   private initMetadata(): void {
