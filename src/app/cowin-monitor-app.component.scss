@@ -68,6 +68,10 @@ $red: #ed5565;
     width: 100%;
   }
 
+  .fetch-time-section {
+    padding-bottom: 16px;
+  }
+
   .vaccination-centers-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, 260px);

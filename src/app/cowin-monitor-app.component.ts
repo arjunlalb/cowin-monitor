@@ -98,7 +98,7 @@ enum View {
         <button *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="button" (click)="this.goToNextDay()">Next Day</button>
       </div>
 
-      <div *ngIf="this.requestInProgress === false && this.fetchTime">
+      <div class="fetch-time-section" *ngIf="this.requestInProgress === false && this.fetchTime">
         <span>Data last fetched on {{ this.fetchTime?.toLocaleDateString() }}, {{ this.fetchTime?.toLocaleTimeString()}}</span>
       </div>
       
