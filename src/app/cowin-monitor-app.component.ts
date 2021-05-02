@@ -225,7 +225,7 @@ export class CowinMonitorAppComponent {
 
     // Eligibility age filter
     // tslint:disable-next-line:triple-equals
-    this.centers = filteredList.filter(center => this.getAgeEligibility(center) === this.eligibilityAgeFilter as number);
+    filteredList = filteredList.filter(center => this.getAgeEligibility(center) == this.eligibilityAgeFilter);
 
     // Availability filter
     this.centers = this.filterByAvailability ? filteredList.filter(center => this.getAvailableCapacity(center) > 0) : filteredList;
