@@ -17,11 +17,11 @@ enum View {
     <div class="app-cowin-monitor">
       <div class="disclaimer">
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find vaccine availability information. User will have to book their
-          vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
-        <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public
+          vaccination slots via the official channels like Aarogya Setu app, CoWin portal/app etc. </p>
+        <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from CoWin Public
           APIs <a href="https://apisetu.gov.in/public/api/cowin#">here</a>.</p>
         <p class="disclaimer-line"> Built on API specs as on 2 May 2021. If you notice any bugs or have suggestions, reach out to me on <a
-          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
+          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>. Source on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
       </div>
 
       <div class="header-section">
@@ -252,7 +252,7 @@ export class CowinMonitorAppComponent {
     const tomorrow: Date = this.buildOffsetDate(new Date(), 1);
     this.baseDateForProjection = this.convertDateToDdMmYyyy(this.buildDateString(tomorrow));
     this.nextAvailabilityInformation = new Map<number, Center>();
-    
+
     const dataObservables$: Observable<Center[]>[] = []
     for (let i = 0; i< 8; i++) {
       dataObservables$.push(this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.convertDateToDdMmYyyy(this.buildDateString(this.buildOffsetDate(tomorrow, i * 7))))}`)
