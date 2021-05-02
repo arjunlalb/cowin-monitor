@@ -22,7 +22,7 @@ enum View {
         <p class="disclaimer-line"> If you notice any bugs or have suggestions, reach out to me on <a
           href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a> or create an issue in the project repo on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
       </div>
-
+      <div class="title"><h2>Find Vaccine Availability By District</h2></div>
       <div class="header-section">
         <div class="state-select-section">
           <h4>State : </h4>
