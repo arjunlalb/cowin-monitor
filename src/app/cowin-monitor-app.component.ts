@@ -68,6 +68,11 @@ enum View {
             <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
           </select>
         </div>
+        
+        <div class="search-filter">
+          <h4>Search by center name or pin code</h4>
+          <input class="input search-box" type="text" [(ngModel)]="this.searchText" (ngModelChange)="this.filterCenters()">
+        </div>
 
         <div class="availability-filter">
           <input type="checkbox" [(ngModel)]="this.filterByAvailability" (ngModelChange)="this.filterCenters()">
@@ -138,6 +143,7 @@ export class CowinMonitorAppComponent {
   public states: State[] = [];
   public districts: District[] = [];
   public centers: Center[];
+  public searchText: string = '';
 
   public feeTypeFilterOptions: FeeTypeFilter[] = Object.values(FeeTypeFilter);
   public ageFilterOptions: number[] = [18, 45];
@@ -234,6 +240,7 @@ export class CowinMonitorAppComponent {
 
   public getSlotInformation(): void {
     this.dataView = View.ByDate;
+    this.searchText = '';
     this.requestInProgress = true;
     this.centers = [];
     this.dataSet = [];
@@ -252,6 +259,7 @@ export class CowinMonitorAppComponent {
   }
 
   public populateNextAvailabilityInfo(): void {
+    this.searchText = '';
     this.dataView = View.ByCenter;
     const tomorrow: Date = this.buildOffsetDate(new Date(), 1);
     this.baseDateForProjection = this.convertDateToDdMmYyyy(this.buildDateString(tomorrow));
@@ -327,7 +335,15 @@ export class CowinMonitorAppComponent {
     // Eligibility age filter
     // tslint:disable-next-line:triple-equals
     filteredList = filteredList.filter(center => this.getAgeEligibility(center) == this.eligibilityAgeFilter);
-
+    
+    // Search filter
+    filteredList = this.searchText === ''
+      ? filteredList
+      : filteredList.filter(center =>
+        center.name.toLowerCase().includes(this.searchText.toLowerCase())
+        || center.pincode.toString().toLowerCase().includes(this.searchText.toLowerCase())
+      );
+    
     // Availability filter
     this.centers = this.filterByAvailability ? filteredList.filter(center => this.getAvailableCapacity(center) > 0) : filteredList;
 

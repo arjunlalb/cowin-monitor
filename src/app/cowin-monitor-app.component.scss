@@ -58,6 +58,10 @@ $red: #ed5565;
     & > * {
       margin: 0 16px;
     }
+
+    .search-box {
+      min-width: 200px;
+    }
   }
 
   .metadata-section {
@@ -146,8 +150,9 @@ $red: #ed5565;
 }
 
 .input {
-  height: 32px;
+  height: 36px;
   padding-left: 4px;
+  box-sizing: border-box;
 }
 
 .button {
