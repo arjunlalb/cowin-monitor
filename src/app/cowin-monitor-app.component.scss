@@ -53,6 +53,7 @@ $red: #ed5565;
     @include row-flex;
     padding: 16px;
     align-items: flex-end;
+    flex-flow: wrap;
 
     & > * {
       margin: 0 16px;
