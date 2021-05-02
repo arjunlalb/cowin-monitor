@@ -10,3 +10,8 @@ Run `npm start` or  `ng serve` for a dev server. Navigate to `http://localhost:4
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+
+## Guidelines for raising a PR
+
+* Specify a clear title for the PR.
+* For non-minor changes, give a description of the changes.
