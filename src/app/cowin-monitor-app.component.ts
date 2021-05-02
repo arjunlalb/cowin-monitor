@@ -95,8 +95,11 @@ enum View {
           <span *ngIf="this.isCenterView()">Displayed information is availability status for next 2 months, starting tomorrow {{this.baseDateForProjection}}.</span>
         </div>
         <div *ngIf="this.requestInProgress">Fetching data ...</div>
-
         <button *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="button" (click)="this.goToNextDay()">Next Day</button>
+      </div>
+
+      <div *ngIf="this.requestInProgress === false && this.fetchTime">
+        <span>Data last fetched on {{ this.fetchTime?.toLocaleDateString() }}, {{ this.fetchTime?.toLocaleTimeString()}}</span>
       </div>
       
       <div class="vaccination-centers-info">
@@ -131,7 +134,7 @@ export class CowinMonitorAppComponent {
   public filterByAvailability: boolean = false;
   public dataView: View = View.ByDate;
   public baseDateForProjection: string = '';
-
+  public fetchTime: Date;
   public states: State[] = [];
   public districts: District[] = [];
   public centers: Center[];
@@ -233,6 +236,7 @@ export class CowinMonitorAppComponent {
     this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.formattedDate)}`)
       .pipe(map((data: Dictionary<unknown>) => data.centers as Center[]), finalize(() => { this.requestInProgress = false; this.shouldShowDaySwitchers = true;}))
       .subscribe((data: Center[]) => {
+        this.fetchTime = new Date();
         this.centers = data.sort(this.getSortCenterByNameFn());
         this.dataSet = [...this.centers];
         this.filterCenters();
@@ -256,6 +260,7 @@ export class CowinMonitorAppComponent {
     }
 
     forkJoin(dataObservables$).subscribe(resultList => {
+      this.fetchTime = new Date();
       resultList.forEach((centers: Center[]) => {
         centers.forEach(center => {
           const existingCenterInfo: Center = this.nextAvailabilityInformation.get(center.center_id);
