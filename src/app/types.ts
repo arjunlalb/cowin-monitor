@@ -13,7 +13,7 @@ export interface District {
 }
 
 export interface Center {
-  id: number;
+  center_id: number;
   name: string;
   pincode: string;
   fee_type : string;

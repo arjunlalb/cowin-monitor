@@ -101,10 +101,6 @@
       "allow-constructor-only"
     ],
     "strict-comparisons": false,
-    "import-blacklist": [true, "@angular/material", [".*/src/.*"]],
-    "ban": [
-      true,
-      { "name": "forkJoin", "message": "Use forkJoinSafeEmpty instead" }
-    ]
+    "import-blacklist": [true, "@angular/material", [".*/src/.*"]]
   }
 }

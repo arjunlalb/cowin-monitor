@@ -1,9 +1,14 @@
 import {HttpClient} from '@angular/common/http';
 import {Component} from '@angular/core';
-import {EMPTY} from 'rxjs';
+import {EMPTY, forkJoin, Observable} from 'rxjs';
 import {catchError, finalize, map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
 import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
+
+enum View {
+  ByDate,
+  ByCenter
+}
 
 @Component({
   selector: 'app-cowin-monitor',
@@ -42,10 +47,14 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
         </div>
 
         <div class="action-button-section">
-          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableButton()">Check</button>
+          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableCheckButton()">Check</button>
+        </div>
+
+        <div class="action-button-section">
+          <button class="button" (click)="this.populateNextAvailabilityInfo()" [disabled]="this.selectedDistrictId === ''">See availability by centres</button>
         </div>
       </div>
-      
+
       <div class="filter-section">
         <div class="fee-type-filter">
           <h4>Filter by fee type</h4>
@@ -60,7 +69,7 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
             <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
           </select>
         </div>
-        
+
         <div class="availability-filter">
           <input type="checkbox" [(ngModel)]="this.filterByAvailability" (ngModelChange)="this.filterCenters()">
           <span>Show only available centers</span>
@@ -80,17 +89,18 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
       </div>
 
       <div class="metadata-section">
-        <button *ngIf="this.shouldShowDaySwitchers" class="button" (click)="this.goToPreviousDay()">Previous Day</button>
+        <button *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="button" (click)="this.goToPreviousDay()">Previous Day</button>
         <div *ngIf="this.centers?.length === 0 && this.requestInProgress === false">No vaccination centers matching this criteria available at the moment.</div>
-        <div *ngIf="this.centers?.length > 0 && this.requestInProgress === false">Found {{this.centers?.length}} vaccination centers</div>
+        <div *ngIf="this.centers?.length > 0 && this.requestInProgress === false">Found {{this.centers?.length}} vaccination centers. 
+          <span *ngIf="this.isCenterView()">Displayed information is availability status for next 2 months, starting tomorrow {{this.baseDateForProjection}}.</span>
+        </div>
         <div *ngIf="this.requestInProgress">Fetching data ...</div>
-        
-        <button *ngIf="this.shouldShowDaySwitchers" class="button" (click)="this.goToNextDay()">Next Day</button>
+
+        <button *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="button" (click)="this.goToNextDay()">Next Day</button>
       </div>
       
-      <div *ngFor="let availability of this.getAvailabilityInfoForDisplay()"></div>
-      
       <div class="vaccination-centers-info">
+        
         <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
 
           <p class="center-name">{{ center.name }}</p>
@@ -99,7 +109,8 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
           </div>
           <p class="pin-code">Pincode : {{ center.pincode}}</p>
           <p class="capacity">Available Doses : {{ this.getAvailableCapacity(center)}}</p>
-          <p *ngIf="center.sessions[0].vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
+          <p *ngIf="center.sessions[0]?.vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
+          <p *ngIf="this.isCenterView()" class="availability">Available on : {{this.getAvailabilityDateDisplayString(center.sessions[0]?.date)}}</p>
         </div>
       </div>
     </div>
@@ -118,6 +129,8 @@ export class CowinMonitorAppComponent {
   public feeTypeFilter: FeeTypeFilter = FeeTypeFilter.FreeAndPaid;
   public eligibilityAgeFilter: number = 45;
   public filterByAvailability: boolean = false;
+  public dataView: View = View.ByDate;
+  public baseDateForProjection: string = '';
 
   public states: State[] = [];
   public districts: District[] = [];
@@ -128,7 +141,6 @@ export class CowinMonitorAppComponent {
   public shouldShowDaySwitchers: boolean = false;
 
   private nextAvailabilityInformation: Map<number, Center> = new Map<number, Center>();
-  private shouldBuildAvailabilityInfo: boolean = true;
   public constructor(private readonly httpClient: HttpClient) {
     this.getStates();
   }
@@ -140,7 +152,6 @@ export class CowinMonitorAppComponent {
 
   public setDistrict(districtId: string): void {
     this.selectedDistrictId = districtId;
-    // This.populateNextAvailabilityInfo();
   }
 
   public setDate(date: string): void {
@@ -156,6 +167,9 @@ export class CowinMonitorAppComponent {
     this.setDateAndRefresh(this.buildOffsetDate(new Date(this.selectedDate), 1));
   }
 
+  public isCenterView(): boolean {
+    return this.dataView === View.ByCenter;
+  }
   public goToPreviousDay(): void {
     this.setDateAndRefresh(this.buildOffsetDate(new Date(this.selectedDate), -1));
   }
@@ -179,12 +193,12 @@ export class CowinMonitorAppComponent {
     ].join('-');
   }
 
-  public enableButton(): boolean {
+  public enableCheckButton(): boolean {
     return this.selectedDistrictId !== '' && this.selectedDate !== '';
   }
 
   public getVaccineDetails(center: Center): string {
-    const vaccineName: string = center.sessions[0].vaccine;
+    const vaccineName: string = center.sessions[0]?.vaccine;
 
     if (vaccineName === '') {
       return '!';
@@ -203,7 +217,16 @@ export class CowinMonitorAppComponent {
     return `${CONSTANTS.URL_PREFIX}/appointment/sessions/public/calendarByDistrict?district_id=${districtId}&date=${date}`;
   }
 
+  public getAvailabilityDateDisplayString(date: string | undefined): string {
+    if (date) {
+      return date;
+    }
+
+    return 'No slots found';
+  }
+
   public getSlotInformation(): void {
+    this.dataView = View.ByDate;
     this.requestInProgress = true;
     this.centers = [];
     this.dataSet = [];
@@ -220,47 +243,49 @@ export class CowinMonitorAppComponent {
     return (center1, center2) => (center1.name as string).localeCompare(center2.name as string)
   }
 
-  private populateNextAvailabilityInfo(): void {
-    const today: Date = new Date();
-    this.shouldBuildAvailabilityInfo = false;
+  public populateNextAvailabilityInfo(): void {
+    this.dataView = View.ByCenter;
+    const tomorrow: Date = this.buildOffsetDate(new Date(), 1);
+    this.baseDateForProjection = this.convertDateToDdMmYyyy(this.buildDateString(tomorrow));
 
-    for (let i = 0; i < 8; i++) {
-      // Fetching one week at a time, for 8 weeks
-      this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.buildDateString(this.buildOffsetDate(today, i * 7)))}`)
+    const dataObservables$: Observable<Center[]>[] = []
+    for (let i = 0; i< 8; i++) {
+      dataObservables$.push(this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.convertDateToDdMmYyyy(this.buildDateString(this.buildOffsetDate(tomorrow, i * 7))))}`)
         .pipe(
-          map((data: Dictionary<unknown>) => data.centers as Center[]),
-          catchError(() => {
-            this.shouldBuildAvailabilityInfo = true;
-
-            return EMPTY;
-          }))
-        .subscribe(
-        (data: Center[]) => {
-          data.forEach(center => {
-            const existingCenterInfo: Center = this.nextAvailabilityInformation.get(center.id);
-            if (existingCenterInfo === undefined) {
-              this.nextAvailabilityInformation.set(center.id, this.removeUnavailableSessionsFromCenter(center))
-            } else {
-
-              this.nextAvailabilityInformation.set(center.id, {
-                ...existingCenterInfo, sessions: existingCenterInfo.sessions.concat(...this.removeUnavailableSessionsFromCenter(center).sessions)
-              })
-            }
-          })
-        }
-      )
+          map((data: Dictionary<unknown>) => data.centers as Center[])));
     }
 
+    forkJoin(dataObservables$).subscribe(resultList => {
+      resultList.forEach((centers: Center[]) => {
+        centers.forEach(center => {
+          const existingCenterInfo: Center = this.nextAvailabilityInformation.get(center.center_id);
+          if (existingCenterInfo === undefined) {
+            this.nextAvailabilityInformation.set(center.center_id, this.removeUnavailableSessionsFromCenter(center))
+          } else {
 
+            this.nextAvailabilityInformation.set(center.center_id, {
+              ...existingCenterInfo, sessions: existingCenterInfo.sessions.concat(...this.removeUnavailableSessionsFromCenter(center).sessions)
+            })
+          }
+        })
+      });
+
+      this.computeCenterAvailabilityData();
+    })
+  }
+
+  public computeCenterAvailabilityData(): void {
+    this.centers = this.getAvailabilityInfoForDisplay().sort(this.getSortCenterByNameFn());
+    this.dataSet = [...this.centers ];
+    this.filterCenters();
   }
 
   public getAvailabilityInfoForDisplay(): Center[] {
     const availabilityInfo: Center[] = Array.from(this.nextAvailabilityInformation.values());
     availabilityInfo.sort(this.getSortCenterByNameFn())
     availabilityInfo.forEach(center => {
-      center.sessions.sort((session1, session2) => new Date(session1.date).getTime() - new Date(session2.date).getTime())
+      center.sessions = center.sessions.sort((session1, session2) => new Date(session1.date).getMilliseconds() - new Date(session2.date).getMilliseconds())
     })
-    console.log(availabilityInfo);
 
     return availabilityInfo;
   }
@@ -300,11 +325,11 @@ export class CowinMonitorAppComponent {
   }
 
   public getAvailableCapacity(center: Center): number {
-    return center.sessions[0].available_capacity;
+    return center.sessions[0]?.available_capacity ?? 0;
   }
 
   public getAgeEligibility(center: Center): number {
-    return center.sessions[0].min_age_limit;
+    return center.sessions[0]?.min_age_limit ?? 45;
   }
 
   private getStates(): void {
