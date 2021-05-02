@@ -18,9 +18,9 @@ enum View {
       <div class="disclaimer">
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find vaccine availability information. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, CoWin portal/app etc. </p>
-        <p class="disclaimer-line">Data is fetched in real time from <a href="https://apisetu.gov.in/public/api/cowin#">CoWin Public APIs</a>.</p>
-        <p class="disclaimer-line"> Built on API specs as on 2 May 2021. If you notice any bugs or have suggestions, reach out to me on <a
-          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>. Source on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
+        <p class="disclaimer-line">Data is fetched in real time from <a href="https://apisetu.gov.in/public/api/cowin#">CoWin Public APIs</a>. Built on API specs as on 2 May 2021. </p>
+        <p class="disclaimer-line"> If you notice any bugs or have suggestions, reach out to me on <a
+          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a> or create an issue in the project repo on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
       </div>
 
       <div class="header-section">
