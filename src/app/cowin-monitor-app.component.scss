@@ -14,6 +14,7 @@ $red: #ed5565;
 .app-cowin-monitor {
   @include column-flex;
   align-items: center;
+  font-family: 'Open Sans', sans-serif;
   padding: 16px;
 
   .header-section {
