@@ -13,8 +13,8 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find availability for a certain date. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, Co-Win portal/app etc. </p>
         <p class="disclaimer-line">To know exact status of availability per age group, please refer to the above said official apps. Data is fetched in real time from Co-WIN Public
-          APIs as mentioned <a href="https://apisetu.gov.in/public/api/cowin#">here</a> (as on 2 May 2021).</p>
-        <p class="disclaimer-line">If you notice any bugs or have suggestions, reach out to me on <a
+          APIs <a href="https://apisetu.gov.in/public/api/cowin#">here</a>.</p>
+        <p class="disclaimer-line"> Built on API specs as on 2 May 2021. If you notice any bugs or have suggestions, reach out to me on <a
           href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a>.</p>
       </div>
 
@@ -44,6 +44,22 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
           <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableButton()">Check</button>
         </div>
       </div>
+      
+      <div class="filter-section">
+        <div class="fee-type-filter">
+          <h4>Filter by fee type</h4>
+          <select class="select" name="Filter by fee type" [(ngModel)]="this.feeTypeFilter" (ngModelChange)="this.filterCenters()">
+            <option *ngFor="let feeTypeFilterOption of this.feeTypeFilterOptions" [value]="feeTypeFilterOption">{{ feeTypeFilterOption }}</option>
+          </select>
+        </div>
+
+        <div class="eligibility-filter">
+          <h4>Filter by eligibility</h4>
+          <select class="select" name="Filter by fee type" [(ngModel)]="this.eligibilityAgeFilter" (ngModelChange)="this.filterCenters()">
+            <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
+          </select>
+        </div>
+      </div>
 
       <div class="legend-section">
         <div class="legend">
@@ -57,15 +73,10 @@ import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
         </div>
       </div>
 
-      <div *ngIf="this.centers?.length === 0 && this.requestInProgress === false">No vaccination centers available at the moment.</div>
-      <div *ngIf="this.requestInProgress">Fetching data ...</div>
-
-      <div class="filter-section" *ngIf="this.centers?.length > 0">
-        <div class="fee-type-filter">
-          <select class="select" name="Filter by fee type" [(ngModel)]="this.feeTypeFilter" (ngModelChange)="this.filterCenters()">
-            <option *ngFor="let feeTypeFilterOption of this.feeTypeFilterOptions" [value]="feeTypeFilterOption">{{ feeTypeFilterOption }}</option>
-          </select>
-        </div>
+      <div class="metadata-section">
+        <div *ngIf="this.centers?.length === 0 && this.requestInProgress === false">No vaccination centers matching this criteria available at the moment.</div>
+        <div *ngIf="this.centers?.length > 0 && this.requestInProgress === false">Found {{this.centers?.length}} vaccination centers</div>
+        <div *ngIf="this.requestInProgress">Fetching data ...</div>
       </div>
       
       <div class="vaccination-centers-info">
@@ -93,12 +104,15 @@ export class CowinMonitorAppComponent {
   public centersWithAvailability?: number;
   public centersWithoutAvailability?: number;
   public feeTypeFilter: FeeTypeFilter = FeeTypeFilter.FreeAndPaid;
+  public eligibilityAgeFilter: number = 45;
 
   public states: State[] = [];
   public districts: District[] = [];
   public centers: Center[];
 
   public feeTypeFilterOptions: FeeTypeFilter[] = Object.values(FeeTypeFilter);
+  public ageFilterOptions: number[] = [18, 45];
+
   public constructor(private readonly httpClient: HttpClient) {
     this.getStates();
   }
@@ -134,7 +148,7 @@ export class CowinMonitorAppComponent {
       .subscribe((data: Center[]) => {
         this.centers = data.sort((center1, center2) => (center1.name as string).localeCompare(center2.name as string));
         this.dataSet = [...this.centers];
-        this.initMetadata();
+        this.filterCenters();
       });
   }
 
@@ -144,13 +158,23 @@ export class CowinMonitorAppComponent {
   }
 
   public filterCenters(): void {
-    if (this.feeTypeFilter === FeeTypeFilter.FreeAndPaid) {
-      this.centers = [ ...this.dataSet ];
-    } else if (this.feeTypeFilter === FeeTypeFilter.OnlyPaid) {
-      this.centers = this.dataSet.filter(center => center.fee_type === 'Paid');
-    } else {
-      this.centers = this.dataSet.filter(center => center.fee_type === 'Free');
+    // Fee type filter
+    let filteredList: Center[];
+    switch (this.feeTypeFilter) {
+      case FeeTypeFilter.OnlyPaid:
+        filteredList = this.dataSet.filter(center => center.fee_type === 'Paid');
+        break;
+      case FeeTypeFilter.OnlyFree:
+        filteredList = this.dataSet.filter(center => center.fee_type === 'Free');
+        break;
+      case FeeTypeFilter.FreeAndPaid:
+      default:
+        filteredList = [...this.dataSet];
     }
+
+    // Eligibility age filter
+    // tslint:disable-next-line:triple-equals
+    this.centers = filteredList.filter(center => this.getAgeEligibility(center) == this.eligibilityAgeFilter);
 
     this.initMetadata();
   }

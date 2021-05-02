@@ -49,6 +49,15 @@ $red: #ed5565;
   }
 
   .filter-section {
+    @include row-flex;
+    padding: 16px;
+
+    & > * {
+      margin: 0 16px;
+    }
+  }
+
+  .metadata-section {
     padding: 16px;
   }
 
@@ -149,3 +158,6 @@ $red: #ed5565;
   color: white;
 }
 
+h4 {
+  margin: 16px 0;
+}
