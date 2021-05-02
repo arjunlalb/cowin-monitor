@@ -71,7 +71,7 @@ enum View {
         
         <div class="search-filter">
           <h4>Search by center name or pin code</h4>
-          <input class="input search-box" type="text" [(ngModel)]="this.searchText" (ngModelChange)="this.filterCenters()">
+          <input class="input search-box" type="text" placeholder="Type here" [(ngModel)]="this.searchText" (ngModelChange)="this.filterCenters()">
         </div>
 
         <div class="availability-filter">
