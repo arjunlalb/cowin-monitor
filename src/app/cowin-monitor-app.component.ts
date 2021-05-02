@@ -251,7 +251,8 @@ export class CowinMonitorAppComponent {
     this.dataView = View.ByCenter;
     const tomorrow: Date = this.buildOffsetDate(new Date(), 1);
     this.baseDateForProjection = this.convertDateToDdMmYyyy(this.buildDateString(tomorrow));
-
+    this.nextAvailabilityInformation = new Map<number, Center>();
+    
     const dataObservables$: Observable<Center[]>[] = []
     for (let i = 0; i< 8; i++) {
       dataObservables$.push(this.httpClient.get(`${this.buildCalendarUrl(this.selectedDistrictId, this.convertDateToDdMmYyyy(this.buildDateString(this.buildOffsetDate(tomorrow, i * 7))))}`)
