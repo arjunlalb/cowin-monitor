@@ -8,11 +8,12 @@
   flex-direction: row;
 }
 
-$green: #659a41;
+$green: #3FA34D;
 $red: #ed5565;
 
 $alice-blue : #e7ecef;
 $yale-blue: #274c77;
+$cultured: #f2f5f8;
 
 $battleship-grey: #8B8C89;
 
@@ -28,6 +29,7 @@ $battleship-grey: #8B8C89;
     display: flex;
     flex-flow: wrap;
     background-color: $alice-blue;
+    padding: 8px 16px;
   }
 
   .header-section {
@@ -195,7 +197,13 @@ $battleship-grey: #8B8C89;
 
   &:disabled {
     background-color: $battleship-grey;
-    border: 1px solid $battleship-grey;
+    border-color: $battleship-grey;
+  }
+
+  &:not(:disabled):hover {
+    background-color: $cultured;
+    border-color: $cultured;
+    color: black;
   }
 }
 
@@ -214,13 +222,13 @@ $battleship-grey: #8B8C89;
 
 .available {
   background-color: $green;
-  border: 1px solid $green;
+  border-color: $green;
   color: white;
 }
 
 .not-available {
   background-color: $red;
-  border: 1px solid $red;
+  border-color: $green;
   color: white;
 }
 
