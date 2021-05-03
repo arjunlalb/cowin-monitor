@@ -22,7 +22,7 @@ enum View {
         <p class="disclaimer-line"> If you notice any bugs or have suggestions, reach out to me on <a
           href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a> or create an issue in the project repo on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
       </div>
-      <div class="title"><h2>Find Vaccine Availability By District</h2></div>
+      <div class="title-section"><h2>Find Vaccine Availability By District</h2></div>
       <div class="header-section">
         <div class="state-select-section">
           <h4>State : </h4>
@@ -56,27 +56,27 @@ enum View {
 
       <div class="filter-section">
         <div class="fee-type-filter">
-          <h4>Filter by fee type</h4>
+          <h4 class="item-title">Filter by fee type</h4>
           <select class="select" name="Filter by fee type" [(ngModel)]="this.feeTypeFilter" (ngModelChange)="this.filterCenters()">
             <option *ngFor="let feeTypeFilterOption of this.feeTypeFilterOptions" [value]="feeTypeFilterOption">{{ feeTypeFilterOption }}</option>
           </select>
         </div>
 
         <div class="eligibility-filter">
-          <h4>Filter by eligibility</h4>
+          <h4 class="item-title">Filter by eligibility</h4>
           <select class="select" name="Filter by fee type" [(ngModel)]="this.eligibilityAgeFilter" (ngModelChange)="this.filterCenters()">
             <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
           </select>
         </div>
         
         <div class="search-filter">
-          <h4>Search by center name or pin code</h4>
+          <h4 class="item-title">Search by center name or pin code</h4>
           <input class="input search-box" type="text" placeholder="Type here" [(ngModel)]="this.searchText" (ngModelChange)="this.filterCenters()">
         </div>
 
         <div class="availability-filter">
           <input type="checkbox" [(ngModel)]="this.filterByAvailability" (ngModelChange)="this.filterCenters()">
-          <span>Show only available centers</span>
+          <span class="item-title">Show only available centers</span>
         </div>
       </div>
 

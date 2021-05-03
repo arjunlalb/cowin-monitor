@@ -11,19 +11,37 @@
 $green: #659a41;
 $red: #ed5565;
 
+$alice-blue : #e7ecef;
+$yale-blue: #274c77;
+
+$battleship-grey: #8B8C89;
+
 .app-cowin-monitor {
   @include column-flex;
   align-items: center;
   font-family: 'Open Sans', sans-serif;
-  padding: 16px;
+  padding: 16px 0;
+
+  .title-section {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-flow: wrap;
+    background-color: $alice-blue;
+  }
 
   .header-section {
     @include row-flex;
     flex-flow: wrap;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 16px;
+    background-color: $yale-blue;
+    color: $alice-blue;
 
     & > * {
       @include column-flex;
-      padding: 8px;
+      padding: 0 8px;
     }
 
     .action-button-section {
@@ -52,22 +70,30 @@ $red: #ed5565;
 
   .filter-section {
     @include row-flex;
-    padding: 16px;
+    padding: 16px 16px 24px 16px;
     align-items: flex-end;
     flex-flow: wrap;
+    width: 100%;
+    justify-content: center;
+    background-color: $yale-blue;
+    color: $alice-blue;
 
     & > * {
-      margin: 0 16px;
+      margin: 0 8px;
     }
 
     .search-box {
-      min-width: 200px;
+      min-width: 220px;
+    }
+
+    .item-title {
+      font-size: 14px;
     }
   }
 
   .metadata-section {
-    padding: 16px;
     @include row-flex;
+    padding: 16px;
     justify-content: space-evenly;
     align-items: center;
     width: 100%;
@@ -168,8 +194,8 @@ $red: #ed5565;
   cursor: pointer;
 
   &:disabled {
-    background-color: gray;
-    border: 1px solid gray;
+    background-color: $battleship-grey;
+    border: 1px solid $battleship-grey;
   }
 }
 
