@@ -18,7 +18,7 @@ export interface Center {
   pincode: string;
   fee_type : string;
   sessions: Session[];
-  vaccine_fees: {
+  vaccine_fees?: {
     vaccine: string;
     fee: number;
   }[]

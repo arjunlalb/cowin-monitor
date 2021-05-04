@@ -59,13 +59,30 @@ $battleship-grey: #8B8C89;
       align-items: center;
       margin: 16px;
 
-      .marker {
-        height: 20px;
-        width: 40px;
-      }
+      .legend-item {
+        margin: 8px;
+        padding: 16px;
+        width: 180px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
 
-      & > * {
-        margin-right: 8px;
+        .status-text {
+          width: 100%;
+          padding-left: 16px;
+          text-transform: uppercase;
+          font-size: 14px;
+          font-weight: bold;
+        }
+
+        .count {
+          width: 100%;
+          padding-top: 16px;
+          padding-left: 16px;
+          font-size: 32px;
+          font-weight: bold;
+        }
       }
     }
   }
@@ -101,8 +118,17 @@ $battleship-grey: #8B8C89;
     width: 100%;
   }
 
-  .fetch-time-section {
-    padding-bottom: 16px;
+  .results-section {
+    @include column-flex;
+    width: 100%;
+    padding: 0 32px;
+  }
+
+  .date-switchers-section {
+    @include row-flex();
+    width: 100%;
+    margin-bottom: 16px;
+    justify-content: space-around;
   }
 
   .vaccination-centers-info {
@@ -137,6 +163,7 @@ $battleship-grey: #8B8C89;
         font-weight: bolder;
         letter-spacing: 0.02em;
         text-align: center;
+        text-transform: uppercase;
       }
 
       .vaccine-details {
@@ -202,7 +229,7 @@ $battleship-grey: #8B8C89;
 
   &:not(:disabled):hover {
     background-color: $cultured;
-    border-color: $cultured;
+    border-color: $battleship-grey;
     color: black;
   }
 }
