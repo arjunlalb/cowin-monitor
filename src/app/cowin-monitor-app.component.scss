@@ -53,6 +53,8 @@ $battleship-grey: #8B8C89;
 
   .legend-section {
     @include row-flex;
+    flex-flow: wrap;
+    justify-content: center;
 
     .legend {
       @include row-flex;
