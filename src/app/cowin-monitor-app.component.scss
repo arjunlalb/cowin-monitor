@@ -112,8 +112,8 @@ $battleship-grey: #8B8C89;
     }
   }
 
-  .metadata-section {
-    @include row-flex;
+  .info-message-section {
+    @include column-flex;
     padding: 16px;
     justify-content: space-evenly;
     align-items: center;
