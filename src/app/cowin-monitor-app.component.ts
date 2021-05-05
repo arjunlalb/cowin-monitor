@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {EMPTY, forkJoin, Observable} from 'rxjs';
 import {catchError, finalize, map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
@@ -46,11 +46,11 @@ enum View {
         </div>
 
         <div class="action-button-section">
-          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableCheckButton()">Check</button>
+          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableCheckButton()">Fetch</button>
         </div>
 
         <div class="action-button-section">
-          <button class="button" (click)="this.populateNextAvailabilityInfo()" [disabled]="this.selectedDistrictId === ''">See availability by centres</button>
+          <button class="button" (click)="this.populateNextAvailabilityInfo()" [disabled]="this.selectedDistrictId === ''">Show future availability</button>
         </div>
       </div>
 
@@ -134,7 +134,7 @@ enum View {
     </div>
   `
 })
-export class CowinMonitorAppComponent {
+export class CowinMonitorAppComponent implements OnInit {
   public dataSet: Center[];
   public requestInProgress: boolean = false;
 
@@ -164,13 +164,43 @@ export class CowinMonitorAppComponent {
     this.getStates();
   }
 
+  public ngOnInit(): void {
+    const stateId = this.getCookie(CONSTANTS.COOKIE_KEY_STATE);
+    if (stateId) {
+      this.setState(stateId);
+    }
+
+    const districtId = this.getCookie(CONSTANTS.COOKIE_KEY_DISTRICT);
+    if (districtId) {
+      this.setDistrict(districtId);
+    }
+
+    const dateString = this.getCookie(CONSTANTS.COOKIE_KEY_DATE);
+    const targetDate = new Date(dateString);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    if(dateString && targetDate.getTime() >= today.getTime()) {
+      this.setDate(dateString);
+    }
+  }
+
+  private setCookie(key: string, value: string): void {
+    document.cookie = `${key}=${value};max-age=${60*60*24*365}`
+  }
+
+  private getCookie(key: string): string | undefined {
+    return document.cookie.split(';').find(row => row.trim().startsWith(key))?.split('=')?.[1];
+  }
+
   public setState(stateId: string): void {
     this.selectedStateId = stateId;
+    this.setCookie(CONSTANTS.COOKIE_KEY_STATE, this.selectedStateId);
     this.getDistricts();
   }
 
   public setDistrict(districtId: string): void {
     this.selectedDistrictId = districtId;
+    this.setCookie(CONSTANTS.COOKIE_KEY_DISTRICT, this.selectedDistrictId);
   }
 
   public goToCowinPortal(): void {
@@ -179,6 +209,7 @@ export class CowinMonitorAppComponent {
 
   public setDate(date: string): void {
     this.selectedDate = date;
+    this.setCookie(CONSTANTS.COOKIE_KEY_DATE, this.selectedDate);
     this.formattedDate = this.convertDateToDdMmYyyy(date);
   }
 
