@@ -104,8 +104,8 @@ enum View {
       <div *ngIf="this.requestInProgress">Fetching data ...</div>
       
       <div class="info-message-section" *ngIf="this.requestInProgress === false && this.fetchTime">
-        <div *ngIf="this.centers?.length === 0">No vaccination centers matching this criteria available at the moment. </div>
-        <div *ngIf="this.isCenterView()">Below data is availability status for next 2 months, starting tomorrow {{this.baseDateForProjection}}.
+        <div *ngIf="this.centers?.length === 0">No vaccination centers matching this criteria found at the moment. </div>
+        <div *ngIf="this.isCenterView()">Displayed data is the availability status for next 2 months, starting tomorrow({{this.baseDateForProjection}}).
         </div>
         <div>Data last fetched on {{ this.fetchTime?.toLocaleDateString() }}, {{ this.fetchTime?.toLocaleTimeString()}}</div>
       </div>
