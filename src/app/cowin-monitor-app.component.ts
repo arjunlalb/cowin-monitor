@@ -46,7 +46,7 @@ enum View {
         </div>
 
         <div class="action-button-section">
-          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableCheckButton()">Fetch</button>
+          <button class="button" (click)="this.getSlotInformation()" [disabled]="!this.enableCheckButton()">Check</button>
         </div>
 
         <div class="action-button-section">
