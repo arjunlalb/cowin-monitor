@@ -1,9 +1,9 @@
 import {HttpClient} from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
-import {EMPTY, forkJoin, Observable} from 'rxjs';
-import {catchError, finalize, map} from 'rxjs/operators';
+import {forkJoin, Observable} from 'rxjs';
+import {finalize, map} from 'rxjs/operators';
 import {CONSTANTS} from './constants';
-import {Center, Dictionary, District, FeeTypeFilter, State} from './types';
+import {Center, Dictionary, District, FeeTypeFilter, SelectOption, State} from './types';
 
 enum View {
   ByDate,
@@ -18,9 +18,11 @@ enum View {
       <div class="disclaimer">
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find vaccine availability information. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, CoWin portal/app etc. </p>
-        <p class="disclaimer-line">Data is fetched in real time from <a href="https://apisetu.gov.in/public/api/cowin#">CoWin Public APIs</a>. Built on API specs as on 2 May 2021. </p>
+        <p class="disclaimer-line">Data is fetched in real time from <a href="https://apisetu.gov.in/public/api/cowin#">CoWin Public APIs</a>. Built on API specs as on 2 May 2021.
+        </p>
         <p class="disclaimer-line"> If you notice any bugs or have suggestions, reach out to me on <a
-          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a> or create an issue in the project repo on <a href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
+          href="https://twitter.com/arjunlal_">Twitter</a> or <a href="https://linkedin.com/in/arjunlalb">LinkedIn</a> or create an issue in the project repo on <a
+          href="https://github.com/arjunlalb/cowin-monitor">github</a>.</p>
       </div>
       <div class="title-section"><h2>Find Vaccine Availability By District</h2></div>
       <div class="header-section">
@@ -68,6 +70,13 @@ enum View {
             <option *ngFor="let ageFilterOption of this.ageFilterOptions" [value]="ageFilterOption">{{ ageFilterOption }}+</option>
           </select>
         </div>
+
+        <div class="vaccine-type-filter">
+          <h4 class="item-title">Filter by Vaccine type</h4>
+          <select class="select" name="Filter by vaccine type" [(ngModel)]="this.vaccineTypeFilter" (ngModelChange)="this.filterCenters()">
+            <option *ngFor="let vaccineFilterOption of this.vaccineTypeOptions" [value]="vaccineFilterOption.value">{{ vaccineFilterOption.label }}</option>
+          </select>
+        </div>
         
         <div class="search-filter">
           <h4 class="item-title">Search by center name or pin code</h4>
@@ -86,7 +95,7 @@ enum View {
             <div class="status-text">Total No. Of Centers</div>
             <div class="count">{{ this.centers?.length }}</div>
           </div>
-          
+
           <div class="legend-item available">
             <div class="status-text">Available</div>
             <div class="count">{{ this.centersWithAvailability }}</div>
@@ -102,34 +111,34 @@ enum View {
       </div>
 
       <div *ngIf="this.requestInProgress">Fetching data ...</div>
-      
+
       <div class="info-message-section" *ngIf="this.requestInProgress === false && this.fetchTime">
-        <div *ngIf="this.centers?.length === 0">No vaccination centers matching this criteria found at the moment. </div>
+        <div *ngIf="this.centers?.length === 0">No vaccination centers matching this criteria found at the moment.</div>
         <div *ngIf="this.isCenterView()">Displayed data is the availability status for next 2 months, starting tomorrow({{this.baseDateForProjection}}).
         </div>
         <div>Data last fetched on {{ this.fetchTime?.toLocaleDateString() }}, {{ this.fetchTime?.toLocaleTimeString()}}</div>
       </div>
 
       <div class="results-section">
-      <div *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="date-switchers-section">
-        <button class="button" (click)="this.goToPreviousDay()">< Previous Day</button>
-        <button class="button" (click)="this.goToNextDay()">Next Day ></button>
-      </div>
-      
-      <div class="vaccination-centers-info">
-        <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
-          <p class="center-name">{{ center.name }}</p>
-          <div class="info-row"><p>({{this.getAgeEligibility(center)}}+)</p>
-            <div class="fee-type-label">{{ center.fee_type }}</div>
-          </div>
-          <p class="pin-code">Pincode : {{ center.pincode}}</p>
-          <p class="capacity">Available Doses : {{ this.getAvailableCapacity(center)}}</p>
-          <p *ngIf="center.sessions[0]?.vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
-          <p *ngIf="this.isCenterView()" class="availability">Available on : {{this.getAvailabilityDateDisplayString(center.sessions[0]?.date)}}</p>
-          <button *ngIf="this.getAvailableCapacity(center) > 0" class="button book-now-button" (click)="this.goToCowinPortal()">Book Now</button>
+        <div *ngIf="this.shouldShowDaySwitchers && !this.isCenterView()" class="date-switchers-section">
+          <button class="button" (click)="this.goToPreviousDay()">< Previous Day</button>
+          <button class="button" (click)="this.goToNextDay()">Next Day ></button>
         </div>
-        
-      </div>
+
+        <div class="vaccination-centers-info">
+          <div class="vaccination-center-card" *ngFor="let center of this.centers" [ngClass]="this.getAvailableCapacity(center) > 0 ? 'available' : 'not-available'">
+            <p class="center-name">{{ center.name }}</p>
+            <div class="info-row"><p>({{this.getAgeEligibility(center)}}+)</p>
+              <div class="fee-type-label">{{ center.fee_type }}</div>
+            </div>
+            <p class="pin-code">Pincode : {{ center.pincode}}</p>
+            <p class="capacity">Available Doses : {{ this.getAvailableCapacity(center)}}</p>
+            <p *ngIf="center.sessions[0]?.vaccine" class="vaccine-details" [ngClass]="center.sessions[0].vaccine">{{ this.getVaccineDetails(center)}} </p>
+            <p *ngIf="this.isCenterView()" class="availability">Available on : {{this.getAvailabilityDateDisplayString(center.sessions[0]?.date)}}</p>
+            <button *ngIf="this.getAvailableCapacity(center) > 0" class="button book-now-button" (click)="this.goToCowinPortal()">Book Now</button>
+          </div>
+
+        </div>
       </div>
     </div>
   `
@@ -154,8 +163,10 @@ export class CowinMonitorAppComponent implements OnInit {
   public districts: District[] = [];
   public centers: Center[];
   public searchText: string = '';
+  public vaccineTypeFilter: string = '';
 
-  public feeTypeFilterOptions: FeeTypeFilter[] = Object.values(FeeTypeFilter);
+  public feeTypeFilterOptions: FeeTypeFilter[] = [FeeTypeFilter.FreeAndPaid, FeeTypeFilter.OnlyFree, FeeTypeFilter.OnlyPaid];
+  public vaccineTypeOptions: SelectOption[] = [{ label: 'All', value: ''}, { label: 'Covishield', value: 'Covishield'}, { label: 'Covaxin', value: 'Covaxin'}]
   public ageFilterOptions: number[] = [18, 45];
   public shouldShowDaySwitchers: boolean = false;
 
@@ -396,6 +407,9 @@ export class CowinMonitorAppComponent implements OnInit {
         center.name.toLowerCase().includes(this.searchText.toLowerCase())
         || center.pincode.toString().toLowerCase().includes(this.searchText.toLowerCase())
       );
+
+    // Vaccine type filter
+    filteredList = this.vaccineTypeFilter === '' ? filteredList : filteredList.filter(center => (center.sessions[0]?.vaccine ?? '').toLowerCase() === this.vaccineTypeFilter.toLowerCase());
     
     // Availability filter
     this.centers = this.filterByAvailability ? filteredList.filter(center => this.getAvailableCapacity(center) > 0) : filteredList;

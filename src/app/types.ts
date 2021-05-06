@@ -36,3 +36,8 @@ export enum FeeTypeFilter  {
   OnlyPaid = 'Only Paid',
   OnlyFree = 'Only Free'
 }
+
+export interface SelectOption {
+  label: string;
+  value: string;
+}
