@@ -166,7 +166,7 @@ export class CowinMonitorAppComponent implements OnInit {
   public vaccineTypeFilter: string = '';
 
   public feeTypeFilterOptions: FeeTypeFilter[] = [FeeTypeFilter.FreeAndPaid, FeeTypeFilter.OnlyFree, FeeTypeFilter.OnlyPaid];
-  public vaccineTypeOptions: SelectOption[] = [{ label: 'All', value: ''}, { label: 'Covishield', value: 'Covishield'}, { label: 'Covaxin', value: 'Covaxin'}]
+  public vaccineTypeOptions: SelectOption[] = [{ label: 'Any', value: ''}, { label: 'Covishield', value: 'Covishield'}, { label: 'Covaxin', value: 'Covaxin'}]
   public ageFilterOptions: number[] = [18, 45];
   public shouldShowDaySwitchers: boolean = false;
 
