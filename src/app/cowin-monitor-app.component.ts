@@ -15,6 +15,10 @@ enum View {
   styleUrls: ['./cowin-monitor-app.component.scss'],
   template: `
     <div class="app-cowin-monitor">
+      <h3>This application is no longer functional. Please visit <a href="https://cowin.gov.in">cowin.gov.in</a> to know vaccine availability and book your slot.</h3>
+      <h1>Vaccinate. Help everyone get vaccinated.</h1>
+      
+      <div class="hide">
       <div class="disclaimer">
         <p class="disclaimer-line">Disclaimer : This app is intended to serve only as a way to quickly find vaccine availability information. User will have to book their
           vaccination slots via the official channels like Aarogya Setu app, CoWin portal/app etc. </p>
@@ -139,6 +143,7 @@ enum View {
           </div>
 
         </div>
+      </div>
       </div>
     </div>
   `
